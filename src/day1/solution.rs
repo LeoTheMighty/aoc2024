@@ -37,6 +37,7 @@ pub fn get_solution(input_path: &str) -> String {
                     }
                 }
 
+                // Bubble sort second_word_list
                 for i in 0..second_word_list.len() {
                     for j in 0..(second_word_list.len() - i - 1) {
                         if second_word_list[j] > second_word_list[j + 1] {
