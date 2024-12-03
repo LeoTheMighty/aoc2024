@@ -3,6 +3,15 @@ use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
 
+pub fn read<P>(filename: P) -> io::Result<String>
+where P: AsRef<Path> {
+    let mut file = File::open(filename)?;
+    let mut contents = String::new();
+
+    std::io::Read::read_to_string(&mut file, &mut contents)?;
+    Ok(contents)
+}
+
 pub fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>
 where P: AsRef<Path>, {
     let file = File::open(filename)?;
