@@ -1,4 +1,4 @@
-mod common { pub mod common; }
+mod common;
 mod day5;
 
 fn main() {
@@ -8,4 +8,3 @@ fn main() {
         "123"
     );
 }
-

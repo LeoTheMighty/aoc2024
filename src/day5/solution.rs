@@ -1,6 +1,6 @@
 use crate::common::common::read_lines;
 
-fn sort_by_rules(numbers: &mut Vec<i32>, rule_map: &std::collections::HashMap<i32, Vec<i32>>) -> bool {
+fn sort_by_rules(numbers: &mut [i32], rule_map: &std::collections::HashMap<i32, Vec<i32>>) -> bool {
     let n = numbers.len();
     
     // Bubble sort with rule checking
@@ -9,14 +9,6 @@ fn sort_by_rules(numbers: &mut Vec<i32>, rule_map: &std::collections::HashMap<i3
         for j in 0..(n - i - 1) {
             let current = numbers[j];
             let next = numbers[j + 1];
-            
-            // Check if current number has rules
-            if let Some(must_come_before) = rule_map.get(&current) {
-                // If current number must come before next number, don't swap
-                if must_come_before.contains(&next) {
-                    continue;
-                }
-            }
             
             // Check if next number has rules
             if let Some(must_come_before) = rule_map.get(&next) {
@@ -29,20 +21,16 @@ fn sort_by_rules(numbers: &mut Vec<i32>, rule_map: &std::collections::HashMap<i3
         }
     }
 
-    return swapped;
+    swapped
 }
 
 pub fn get_solution(input_path: &str) -> String {
-    let mut solution: String = "".to_owned();
-
     let mut is_first_section = true;
-    let mut rules: Vec<(i32, i32)> = vec![];
     let mut rule_map: std::collections::HashMap<i32, Vec<i32>> = std::collections::HashMap::new();
     let mut valid_sum = 0;
 
     if let Ok(lines) = read_lines(input_path) {
-        for line_result in lines {
-            if let Ok(line) = line_result {
+        for line in lines.map_while(Result::ok) {
                 if is_first_section {
                     // if line is only whitespace, go to next section
                     if line.trim().is_empty() {
@@ -50,29 +38,22 @@ pub fn get_solution(input_path: &str) -> String {
                         continue;
                     }
 
-                    let numbers: Vec<i32> = line.split("|").map(|s| s.parse::<i32>().unwrap()).collect();
+                    let numbers: Vec<i32> = line.split('|').map(|s| s.parse().unwrap()).collect();
 
                     let before = numbers[0];
                     let after = numbers[1];
-                    rules.push((before, after));
 
-                    if !rule_map.contains_key(&before) {
-                        rule_map.insert(before, vec![]);
-                    }
-
-                    rule_map.get_mut(&before).unwrap().push(after);
+                    rule_map.entry(before).or_default().push(after);
                 } else {
                     // The list of page numbers 
-                    let mut numbers: Vec<i32> = line.split(",").map(|s| s.parse::<i32>().unwrap()).collect();
+                    let mut numbers: Vec<i32> = line.split(',').map(|s| s.parse().unwrap()).collect();
 
                     println!("SECTION: {:?}", numbers);
 
-                    let mut swapped = sort_by_rules(&mut numbers, &rule_map);
+                    let swapped = sort_by_rules(&mut numbers, &rule_map);
 
                     if swapped {
-                        let middle_number = numbers[(numbers.len() / 2) as usize];
-
-                        valid_sum += middle_number;
+                        valid_sum += numbers[numbers.len() / 2];
                     }
 
 
@@ -114,11 +95,8 @@ pub fn get_solution(input_path: &str) -> String {
                     }
                     */
                 }
-            }
         }
     }
 
-    solution = valid_sum.to_string();
-
-    return solution;
+    valid_sum.to_string()
 }
