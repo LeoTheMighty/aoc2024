@@ -6,7 +6,7 @@ fn get_object(board: &Vec<Vec<char>>, pos: (i32, i32)) -> char {
     if pos.0 < 0 || pos.1 < 0 || pos.0 >= board.len() as i32 || pos.1 >= board[pos.0 as usize].len() as i32 {
         return EMPTY;
     }
-    return board[pos.0 as usize][pos.1 as usize];
+    board[pos.0 as usize][pos.1 as usize]
 }
 
 fn set_object(board: &mut Vec<Vec<char>>, pos: (i32, i32), object: char) {
@@ -19,10 +19,10 @@ fn set_object(board: &mut Vec<Vec<char>>, pos: (i32, i32), object: char) {
 
 fn turn_right(direction: (i32, i32)) -> (i32, i32) {
     // (-1, 0) -> (0, 1)
-    let directions = vec![(-1, 0), (0, 1), (1, 0), (0, -1)];
+    let directions = [(-1, 0), (0, 1), (1, 0), (0, -1)];
     let index = directions.iter().position(|&d| d == direction).unwrap();
     let new_index = (index + 1) % directions.len();
-    return directions[new_index];
+    directions[new_index]
 
     // use sin and cos, subtract 90 degrees
     // Calculate angle in radians from direction vector
@@ -37,10 +37,6 @@ fn turn_right(direction: (i32, i32)) -> (i32, i32) {
     // return (new_x, new_y);
 }
 
-fn clone_board(board: &Vec<Vec<char>>) -> Vec<Vec<char>> {
-    return board.iter().map(|row| row.clone()).collect();
-}
-
 fn will_loop(board: &Vec<Vec<char>>, pos: (i32, i32), direction: (i32, i32)) -> bool {
     let mut current_pos = pos;
     let mut current_direction = direction;
@@ -53,7 +49,7 @@ fn will_loop(board: &Vec<Vec<char>>, pos: (i32, i32), direction: (i32, i32)) -> 
         }
 
         let next_pos = (current_pos.0 + current_direction.0, current_pos.1 + current_direction.1);
-        let next_object = get_object(&board, next_pos);
+        let next_object = get_object(board, next_pos);
 
         if next_object == EMPTY {
             // They are done 
@@ -72,18 +68,15 @@ fn will_loop(board: &Vec<Vec<char>>, pos: (i32, i32), direction: (i32, i32)) -> 
 
 fn print_board(board: &Vec<Vec<char>>) {
     for row in board {
-        println!("{:?}", row);
+        println!("{row:?}");
     }
 }
 
 pub fn get_solution(input_path: &str) -> String {
-    let mut solution: String = "".to_owned();
-
     let mut board: Vec<Vec<char>> = vec![];
     let mut start_pos: (i32, i32) = (0, 0);
     if let Ok(lines) = read_lines(input_path) {
-        for line_result in lines {
-            if let Ok(line) = line_result {
+        for line in lines.flatten() {
                 let mut row: Vec<char> = vec![];
                 for (i, mut c) in line.chars().enumerate() {
                     if c == '^' {
@@ -94,7 +87,6 @@ pub fn get_solution(input_path: &str) -> String {
                 }
                 board.push(row);
             }
-        }
     }
 
     // walk the man through the board
@@ -118,11 +110,11 @@ pub fn get_solution(input_path: &str) -> String {
             // println!("turn right");
             direction = turn_right(direction);
         } else {
-            let mut cloned_board = clone_board(&board);
+            if !visited.contains(&next_pos) {
+            let mut cloned_board = board.clone();
             // Add a potential barrier and see if it loops
             set_object(&mut cloned_board, next_pos, '#');
             if will_loop(&cloned_board, pos, direction) {
-                if !visited.contains(&next_pos) {
                     obstruction_set.insert(next_pos);
                 }
             }
@@ -147,7 +139,5 @@ pub fn get_solution(input_path: &str) -> String {
     //     }
     // }
 
-    solution = obstruction_set.len().to_string();
-
-    return solution;
+    obstruction_set.len().to_string()
 }
